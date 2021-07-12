@@ -1,0 +1,242 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Online Matching System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid">Bid</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/contract">Contract</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid_monitor">Bid Monitor</a>
+              </li>
+              <li class="nav-item" style="float:right;">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 1rem;">
+        <!-- Contracts -->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <!-- <h5 class="card-header">Ongoing Bids</h5> -->
+                    <div class="card-body">
+                      <h5 class="card-title">{{ contract_details.subject.name }}</h5>
+                      <p class="card-text">Student: {{ contract_details.firstParty.givenName }} {{ contract_details.firstParty.familyName }}</p>
+                      <p class="card-text">Tutor: {{ contract_details.secondParty.givenName }} {{ contract_details.secondParty.familyName }}</p>
+                      <p class="card-text">Date Created: {{ contract_details.dateCreated }}</p>
+                      <p class="card-text">Expiry Date: {{ contract_details.expiryDate }}</p>
+                      <hr>
+                      <p class="card-text">Number of Lesson: {{ contract_details.lessonInfo.numberOfLesson }}</p>
+                      <p class="card-text">Hours per Lesson: {{ contract_details.lessonInfo.hoursPerLesson }}</p>
+                      <p class="card-text">Lesson Time: {{ contract_details.lessonInfo.lessonTime }}</p>
+                      <p class="card-text">Lesson Day: {{ contract_details.lessonInfo.lessonDay }}</p>
+                      <p class="card-text">Lesson Per Week: {{ contract_details.lessonInfo.lessonPerWeek }}</p>
+                      <p class="card-text">Free Lesson: {{ contract_details.lessonInfo.freeLesson }}</p>
+                      <p class="card-text">Rate: {{ contract_details.lessonInfo.lessonRate }} {{ contract_details.lessonInfo.lessonRateChoice }}</p>
+                      {% if contract_expired %}
+                        {% if user_info.isStudent %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reuseModal">
+                          Reuse
+                        </button>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#renewModal">
+                          Renew
+                        </button>
+                        {% else %}
+                        <a href="#" class="list-group-item list-group-item-action list-group-item-danger">Contract Expired</a>
+                        {% endif %}                      
+                      {% else %}
+                        {% if not signed %}
+                        <hr>
+                        <a href="#" class="list-group-item list-group-item-action list-group-item-warning">Contract Not Sign</a>
+                        <br>
+                        <form action="{{ url_for('contracts.sign_contract', contract_id=contract_details.id) }}" method="POST">
+                          {{ csrf_token }}
+                          {% if duration_choices %}
+                          <div class="mb-3">
+                            <label class="form-label">Contract Duration(months):</label>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="contract_duration_choice" id="inlineRadio1" value="2min">
+                              <label class="form-check-label" for="inlineRadio1">2min</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="contract_duration_choice" id="inlineRadio1" value="3">
+                              <label class="form-check-label" for="inlineRadio1">3</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="contract_duration_choice" id="inlineRadio2" value="6" checked>
+                              <label class="form-check-label" for="inlineRadio2">6</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="contract_duration_choice" id="inlineRadio2" value="12">
+                              <label class="form-check-label" for="inlineRadio2">12</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="contract_duration_choice" id="inlineRadio2" value="24">
+                              <label class="form-check-label" for="inlineRadio2">24</label>
+                            </div>
+                          </div>
+                          {% else %}
+                          <input type="hidden" name="contract_duration_choice" value="">
+                          {% endif %}
+                          <div class="mb-3">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" name="sign" value="signed" id="flexCheckDefault">
+                              <label class="form-check-label" for="flexCheckDefault">
+                                Agree and Sign
+                              </label>
+                            </div>
+                          </div>
+                          <input type="submit" class="btn btn-outline-primary btn-sm" value="Sign"></input>
+                        </form>
+                        {% else %}
+                        <a href="#" class="list-group-item list-group-item-action list-group-item-success">Contract Signed</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reuse Modal -->
+<div class="modal fade" id="reuseModal" tabindex="-1" aria-labelledby="reuseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reuseModalLabel">Reuse Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ url_for('contracts.reuse_contract') }}" method="POST">
+            {{ csrf_token }}
+            <input type="hidden" name="current_tutor_id" value="{{contract_details.secondParty.id}}">
+            <input type="hidden" name="contract_id" value="{{contract_details.id}}">
+            <div class="mb-3">
+              <label class="form-label">Choose which contract to <strong>reuse</strong>:</label>
+              <select class="form-select" name='chosen_contract'>
+                  {% for contract in contract_reference_list %}
+                    <option value="{{contract.id}}">Contract with {{contract.secondParty.userName}} learning {{contract.subject.name}} from {{contract.dateCreated[:10]}}</option>
+                  {% endfor %}
+              </select>
+              <div class="form-text">Choosing contract means only reuse the terms in this contract.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Renew with new tutor</label>
+              <div class="input-group mb-3">
+                <div class="input-group-text">
+                  <input class="form-check-input mt-0" type="checkbox" name="new_tutor" value="new" aria-label="Checkbox for following text input">
+                </div>
+                <input type="text" name="new_tutor_id" class="form-control" aria-label="Text input with checkbox">
+              </div>
+              <div class="form-text">Tick and enter the new tutor ID if you want to sign with different tutor.</div>
+            </div>
+            <br>
+            <input type="submit" class="btn btn-primary" value="Submit"></input>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Renew Modal -->
+<div class="modal fade" id="renewModal" tabindex="-1" aria-labelledby="renewModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renewModalLabel">Renew Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ url_for('contracts.renew_contract') }}" method="POST">
+          <input type="hidden" name="current_tutor_id" value="{{contract_details.secondParty.id}}">
+          <input type="hidden" name="subject_id" value="{{contract_details.subject.id}}">
+          <input type="hidden" name="contract_id" value="{{contract_details.id}}">
+            {{ csrf_token }}
+            <div class="mb-3">
+                <label class="form-label">Lesson Needed:</label>
+                <input type="number" class="form-control" name="lesson_needed">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Hours Per Lesson</label>
+                <select class="form-select" name='preferred_hours_per_lesson'>
+                    {% for hour in preferred_hours_per_lesson %}
+                    <option value="{{hour}}">{{hour}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Time:</label>
+                <select class="form-select" name='preferred_time'>
+                    {% for time in preferred_time_list %}
+                    <option value="{{time}}">{{time}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Day:</label>
+                <select class="form-select" name='preferred_day'>
+                    {% for day in preferred_day_list %}
+                    <option value="{{day}}">{{day}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Session Per Week:</label>
+                <input type="number" class="form-control" name="preferred_session_per_week">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Rate Choice:</label>
+                <select class="form-select" name='preferred_rate_choice'>
+                    {% for choice in preferred_rate_choice %}
+                    <option value="{{choice}}">{{choice}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Preferred Rate:</label>
+                <input type="number" class="form-control" name="preferred_rate">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Renew with new tutor</label>
+              <div class="input-group mb-3">
+                <div class="input-group-text">
+                  <input class="form-check-input mt-0" type="checkbox" name="new_tutor" value="new" aria-label="Checkbox for following text input">
+                </div>
+                <input type="text" name="new_tutor_id" class="form-control" aria-label="Text input with checkbox">
+              </div>
+              <div class="form-text">Tick and enter the new tutor ID if you want to sign with different tutor.</div>
+            </div>
+            
+            <input type="submit" class="btn btn-primary" value="Submit"></input>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

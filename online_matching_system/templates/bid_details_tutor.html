@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Online Matching System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid">Bid</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/contract">Contract</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid_monitor">Bid Monitor</a>
+              </li>
+              <li class="nav-item" style="float:right;">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 1rem;">
+        <!-- Bid Details-->
+        <div class="card">
+            <h5 class="card-header">Bid Details</h5>
+            <div class="card-body">
+                <h5 class="card-title">{{ bid_details.bid_subject }}</h5>
+                <p class="card-text">{{ bid_details.bid_date_created }}</p>
+                <p class="card-text">{{ bid_details.bid_date_closed_down }}</p>
+                <p class="card-text"><small class="text-muted">Type: {{ bid_details.bid_type.lower() }}</small></p>
+                <hr>
+                <!-- <h6 class="card-title">Your requests</h6> -->
+                <p class="card-text"><strong>Tutor Qualification:</strong> {{ bid_details.initiator_bid.tutorQualification }}</p>
+                <p class="card-text"><strong>Lesson Needed:</strong> {{ bid_details.initiator_bid.lessonNeeded }}</p>
+                <p class="card-text"><strong>Hours Per Lesson:</strong> {{ bid_details.initiator_bid.preferredHoursPerLesson }} hours</p>
+                <p class="card-text"><strong>Session Per Week:</strong> {{ bid_details.initiator_bid.preferredSessionPerWeek }}</p>
+                <p class="card-text"><strong>Time:</strong> {{ bid_details.initiator_bid.preferredTime }}</p>
+                <p class="card-text"><strong>Day:</strong> {{ bid_details.initiator_bid.preferredDay }}</p>
+                <p class="card-text"><strong>Rate:</strong> RM {{ bid_details.initiator_bid.preferredRate }} {{ bid_details.initiator_bid.preferredRateChoice }}</p>
+                <hr>
+                {% if bid_details.bidder_request %}
+                  <div class="row">
+                  {% for bid in bid_details.bidder_request %}
+                        {% if bid.bidderId == user_info.id %}
+                        <div class="col-sm-4">
+                            {% if bid.bid_chosen %}<div class="card text-white bg-success">{% else %}<div class="card">{% endif %}
+                            <div class="card-body">
+                                <p class="card-text"><strong>Bidder: </strong>{{bid.bidder}}</p>
+                                <p class="card-text"><strong>Number of Lesson Offered:</strong> {{ bid.numberOfLessonOffered }}</p>
+                                <p class="card-text"><strong>Hours Per Lesson Offered:</strong> {{ bid.hoursPerLessonOffered }} hours</p>
+                                <p class="card-text"><strong>Session Per Week Offered:</strong> {{ bid.sessionPerWeekOffered }}</p>
+                                <p class="card-text"><strong>Day and Time: </strong> {{ bid.preferredDayOffered }}, {{ bid.preferredTimeOffered }}</p>
+                                <p class="card-text"><strong>Free Lesson: </strong> {{ bid.freeLesson }} </p>
+                                <p class="card-text"><strong>Rate: </strong> RM{{ bid.rateRequest }} {{ bid.rateChoiceOffered }} </p>
+                                {% if not bid_details.bid_date_closed_down %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                    Edit
+                                  </button>
+                                {% endif %}
+                                </div>
+                                </div>
+                                </div>
+                        </div>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Update Bid</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{{ url_for('bids.update_bid') }}" method="POST">
+                                        {{ csrf_token }}
+                                        <input type="hidden" name="bidder" value="{{user_info.userName}}">
+                                        <input type="hidden" name="bidder_id" value="{{user_info.id}}">
+                                        <input type="hidden" name="bid_id" value="{{bid.bidId}}">
+                                        <div class="mb-3">
+                                            <label class="form-label">Number of Lesson Offered:</label>
+                                            <input type="number" class="form-control" name="number_of_lesson_offered">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Hours Per Lesson Offered:</label>
+                                            <select class="form-select" name='hours_per_lesson_offered'>
+                                                {% for hour in hours_per_lesson_offered %}
+                                                <option value="{{hour}}">{{hour}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Preferred Time Offered:</label>
+                                            <select class="form-select" name='preferred_time_offered'>
+                                                {% for time in preferred_time_list %}
+                                                <option value="{{time}}">{{time}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Preferred Day Offered:</label>
+                                            <select class="form-select" name='preferred_day_offered'>
+                                                {% for day in preferred_day_list %}
+                                                <option value="{{day}}">{{day}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Session Per Week Offered:</label>
+                                            <input type="number" class="form-control" name="session_per_week_offered">
+                                        </div>
+                                        <div class=" mb-3 form-check">
+                                          <input class="form-check-input" type="checkbox" name="free_lesson" id="flexCheckDefault">
+                                          <label class="form-check-label" for="flexCheckDefault">
+                                            Free Lesson
+                                          </label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Rate Choice Offered:</label>
+                                            <select class="form-select" name='rate_choice_offered'>
+                                                {% for choice in rate_choice_offered %}
+                                                <option value="{{choice}}">{{choice}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Rate Request:</label>
+                                            <input type="number" class="form-control" name="rate_request">
+                                        </div>
+                                        <input type="submit" class="btn btn-primary" value="Submit"></input>
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                  {% endfor %}
+                  </div>
+                {% else %}
+                {% if bid_details.bid_date_closed_down %}<li class="list-group-item list-group-item-secondary">There's no bid</li>{% else %}<li class="list-group-item list-group-item-secondary">There's no bid yet</li>{% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

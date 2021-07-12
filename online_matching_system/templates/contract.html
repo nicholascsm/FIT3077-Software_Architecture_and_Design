@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Online Matching System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid">Bid</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/contract">Contract</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid_monitor">Bid Monitor</a>
+              </li>
+              <li class="nav-item" style="float:right;">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 1rem;">
+
+        <!-- Contracts -->
+        <div class="row">
+            {% for contract in user_contract %}
+            <div class="col-sm-6">
+                <div class="card">
+                    <!-- <h5 class="card-header">Ongoing Bids</h5> -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ contract.subject.name }}</h5>
+                        <p class="card-text">Student: {{ contract.firstParty.givenName }} {{ contract.firstParty.familyName }}</p>
+                        <p class="card-text">Tutor: {{ contract.secondParty.givenName }} {{ contract.secondParty.familyName }}</p>
+                        <p class="card-text">Date Created: {{ contract.dateCreated }}</p>
+                        <p class="card-text">Expiry Date: {{ contract.expiryDate }}</p>
+                        <!-- <hr>
+                        <p class="card-text">Number of Lesson: {{ contract.lessonInfo.numberOfLesson }}</p>
+                        <p class="card-text">Hours per Lesson: {{ contract.lessonInfo.hoursPerLesson }}</p>
+                        <p class="card-text">Lesson Time: {{ contract.lessonInfo.lessonTime }}</p>
+                        <p class="card-text">Lesson Day: {{ contract.lessonInfo.lessonDay }}</p>
+                        <p class="card-text">Lesson Per Week: {{ contract.lessonInfo.lessonPerWeek }}</p>
+                        <p class="card-text">Free Lesson: {{ contract.lessonInfo.freeLesson }}</p>
+                        <p class="card-text">Rate: {{ contract.lessonInfo.lessonRate }} {{ contract.lessonInfo.lessonRateChoice }}</p> -->
+                        <a href="{{ url_for('contracts.contract_details',contract_id=contract.id) }}" class="btn btn-secondary">view more</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

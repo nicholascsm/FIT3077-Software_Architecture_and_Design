@@ -1,0 +1,284 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Online Matching System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid">Bid</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/contract">Contract</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid_monitor">Bid Monitor</a>
+              </li>
+              <li class="nav-item" style="float:right;">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h4 class="header">Request Details</h4>
+        <div class="container p-3 my-3 border">
+            {{the_bid['id']}}<br>
+            <p class="card-text">Requestor: {{the_bid['initiator']['familyName']}} {{the_bid['initiator']['givenName']}}</p>
+            <p class="card-text">Date Created: {{the_bid['dateCreated']}} &nbsp; Date Close: {{the_bid['dateClosedDown']}}</p>
+            Subject: {{the_bid['subject']['name']}}<br>
+            Description: {{the_bid['subject']['description']}}<br>
+            Tutor Qualification: {{the_bid['additionalInfo']['initiatorBid']['tutorQualification']}}<br>
+            Lessons Needed: {{the_bid['additionalInfo']['initiatorBid']['lessonNeeded']}}<br>
+            Preferred Time: {{the_bid['additionalInfo']['initiatorBid']['preferredTime']}}<br>
+            Preferred Day: {{the_bid['additionalInfo']['initiatorBid']['preferredDay']}}<br>
+            Preferred Session Per Week: {{the_bid['additionalInfo']['initiatorBid']['preferredSessionPerWeek']}}<br>
+            Preferred Rate Choice: {{the_bid['additionalInfo']['initiatorBid']['preferredRateChoice']}}<br>
+            Preferred Rate: {{the_bid['additionalInfo']['initiatorBid']['preferredRate']}}<br>
+
+        </div>
+        <h5 class="body">Messages:</h5>
+            {% if profile_details['isTutor'] == True %}
+                {% for msgs in the_bid['messages'] if (msgs['additionalInfo']['initialBid']==True) and (msgs['poster']['id'] == profile_details['id']) %}
+                    <div class="card">
+                        <div class="card-body">
+                            {% if msgs['poster']['id'] == profile_details['id'] %}
+                                {% if msgs['poster']['id'] == profile_details['id'] %}
+                                    <h6 class="text">Bidder: {{msgs['poster']['familyName']}} {{msgs['poster']['givenName']}}</h6>
+                                    <h6 class="body">{{msgs['poster']['familyName']}} {{msgs['poster']['givenName']}}'s Offer:</h6>
+                                    Lessons Needed: {{msgs['additionalInfo']['lessonNeeded']}}<br>
+                                    Preferred Hours Per Lesson: {{msgs['additionalInfo']['preferredHours']}}<br>
+                                    Preferred Time: {{msgs['additionalInfo']['preferredTime']}}<br>
+                                    Preferred Day: {{msgs['additionalInfo']['preferredDay']}}<br>
+                                    Session Per Week Offered: {{msgs['additionalInfo']['preferredSessionPerWeek']}}<br>
+                                    Free Lesson: {{msgs['additionalInfo']['freeLesson']}}<br>
+                                    Rate Choice: {{msgs['additionalInfo']['preferredRateChoice']}}<br>
+                                    Rate: {{msgs['additionalInfo']['preferredRate']}}<br>
+                                    <hr>
+                                    {% for msgs2 in reverse_msgs %}
+                                        {% if (msgs2['poster']['id'] == the_bid['initiator']['id']) and (msgs2['additionalInfo']['contentTo']==profile_details['id']) %}
+                                            {{the_bid['initiator']['familyName']}} {{the_bid['initiator']['givenName']}}'s Reply:<br>
+                                            {{msgs2['content']}}
+                                            <hr>
+                                        {% endif %}
+                                        {% if msgs2['poster']['id'] == profile_details['id'] %}
+                                            {{msgs2['poster']['familyName']}} {{msgs2['poster']['givenName']}}'s Reply<br>
+                                            {{msgs2['content']}}
+                                            <hr>
+                                        {% endif %}
+                                    {% endfor %}
+
+
+                                <form action="{{ url_for('bids.reply_messages', bid_id=the_bid['id'], message_id=msgs['id'])}}" method="POST">
+                                    {{ csrf_token }}
+                                    <div class="form-group">
+                                        <label for="comment">Message:</label>
+                                        <textarea class="form-control" rows="5" id="comment4" name="content"></textarea>
+                                    </div>
+                                    <br>
+                                    <input type="submit" class="btn btn-primary" value="Submit"></input>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div><br>
+                {% endfor %}
+
+            {% endif %}
+
+            {% if profile_details['id'] == the_bid['initiator']['id'] %}
+                {{the_bid['dateClosedDown']}}
+                {% for the_msgs in the_bid['messages'] if (the_msgs['additionalInfo']['initialBid']==True) and (the_bid['dateClosedDown']!=None) %}
+                    {% if the_msgs['additionalInfo']['bid_chosen']==True %}
+                        <div class="card text-white bg-success">
+                    {% endif %}
+                    {% if the_msgs['additionalInfo']['bid_chosen']==False %}
+                        <div class="card">
+                    {% endif %}
+                        <div class="card-body">
+                            {% if the_msgs['poster']['id'] != the_bid['initiator']['id'] %}
+                                {{the_msgs['id']}}<br>
+                                <h6 class="card-title">Bidder: {{the_msgs['poster']['familyName']}} {{the_msgs['poster']['givenName']}}</h6>
+                                <p class="text">Message: {{the_msgs['content']}}</p>
+                                <h6 class="body">{{the_msgs['poster']['familyName']}} {{the_msgs['poster']['givenName']}}'s Offer:</h6>
+                                Lessons Needed: {{the_msgs['additionalInfo']['lessonNeeded']}}<br>
+                                Preferred Hours Per Lesson: {{the_msgs['additionalInfo']['preferredHours']}}<br>
+                                Preferred Time: {{the_msgs['additionalInfo']['preferredTime']}}<br>
+                                Preferred Day: {{the_msgs['additionalInfo']['preferredDay']}}<br>
+                                Session Per Week Offered: {{the_msgs['additionalInfo']['preferredSessionPerWeek']}}<br>
+                                Free Lesson: {{the_msgs['additionalInfo']['freeLesson']}}<br>
+                                Rate Choice: {{the_msgs['additionalInfo']['preferredRateChoice']}}<br>
+                                Rate: {{the_msgs['additionalInfo']['preferredRate']}}<br><br>
+                                {% for msgs2 in reverse_msgs %}
+                                    <!-- {{msgs2}}
+                                    {{msgs2['additionalInfo']['contentTo']}}<br>
+                                    {{msgs2['poster']['id']}}<br> -->
+                                    {% if msgs2['additionalInfo']['contentTo']==the_msgs['poster']['id'] %}
+                                        {{msgs2['poster']['familyName']}} {{msgs2['poster']['givenName']}}'s Reply:<br>
+                                        {{msgs2['content']}}
+                                        <hr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {% for msgs in the_bid['messages'] if (msgs['additionalInfo']['initialBid']==True) and (the_bid['dateClosedDown']==None) %}
+                    <div class="card">
+                        <div class="card-body">
+                            {% if msgs['poster']['id'] != the_bid['initiator']['id'] %}
+                                <h6 class="card-title">Bidder: {{msgs['poster']['familyName']}} {{msgs['poster']['givenName']}}</h6>
+                                <p class="text">Message: {{msgs['content']}}</p>
+                                <h6 class="body">{{msgs['poster']['familyName']}} {{msgs['poster']['givenName']}}'s Offer:</h6>
+                                Lessons Needed: {{msgs['additionalInfo']['lessonNeeded']}}<br>
+                                Preferred Hours Per Lesson: {{msgs['additionalInfo']['preferredHours']}}<br>
+                                Preferred Time: {{msgs['additionalInfo']['preferredTime']}}<br>
+                                Preferred Day: {{msgs['additionalInfo']['preferredDay']}}<br>
+                                Session Per Week Offered: {{msgs['additionalInfo']['preferredSessionPerWeek']}}<br>
+                                Free Lesson: {{msgs['additionalInfo']['freeLesson']}}<br>
+                                Rate Choice: {{msgs['additionalInfo']['preferredRateChoice']}}<br>
+                                Rate: {{msgs['additionalInfo']['preferredRate']}}<br><br>
+                                <a href="{{ url_for('bids.choose_offer_close_bid',bid_id=the_bid['id'],message_id=msgs['id']) }}" method="POST" class="btn btn-primary">Accept Offer</a><hr>
+                                {% for msgs2 in reverse_msgs %}
+                                    <!-- {{msgs2}}
+                                    {{msgs2['additionalInfo']['contentTo']}}<br>
+                                    {{msgs2['poster']['id']}}<br> -->
+                                    {% if msgs2['additionalInfo']['contentTo']==msgs['poster']['id'] %}
+                                        {{msgs2['poster']['familyName']}} {{msgs2['poster']['givenName']}}'s Reply:<br>
+                                        {{msgs2['content']}}
+                                        <hr>
+                                    {% endif %}
+                                {% endfor %}
+                                <form action="{{ url_for('bids.reply_messages', bid_id=the_bid['id'], message_id=msgs['id'])}}" method="POST">
+                                    {{ csrf_token }}
+                                <div class="form-group">
+                                    <label for="comment">Message:</label>
+                                    <textarea class="form-control" rows="5" id="comment3" name="content"></textarea>
+                                </div>
+                                    <br>
+                                    <input type="submit" class="btn btn-primary" value="Submit"></input>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div><br>
+                {% endfor %}
+
+            {% endif %}
+            {% if profile_details['isTutor'] == True %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                Offer Bid
+                </button>
+            {% endif %}
+
+    </div>
+</div>
+
+<div class="modal fade modal-dialog-scrollable" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Create Bid</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="{{ url_for('bids.bid_messages', bid_id=the_bid['id']) }}" method="POST">
+                {{ csrf_token }}
+                <div class="mb-3">
+                    <label class="form-label">Number of Lesson Offered:</label>
+                    <input type="number" class="form-control" name="number_of_lesson_offered">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hours Per Lesson Offered:</label>
+                    <select class="form-select" name='hours_per_lesson_offered'>
+                        {% for hour in preferred_hours_per_lesson %}
+                        <option value="{{hour}}">{{hour}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preferred Time Offered:</label>
+                    <select class="form-select" name='preferred_time'>
+                        {% for time in preferred_time_list %}
+                        <option value="{{time}}">{{time}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preferred Day Offered:</label>
+                    <select class="form-select" name='preferred_day'>
+                        {% for day in preferred_day_list %}
+                        <option value="{{day}}">{{day}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Session Per Week Offered:</label>
+                    <input type="number" class="form-control" name="session_per_week_offered">
+                </div>
+                <div class=" mb-3 form-check">
+                  <input class="form-check-input" type="checkbox" name="free_lesson" id="flexCheckDefault">
+                  <label class="form-check-label" for="flexCheckDefault">
+                    Free Lesson
+                  </label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rate Choice Offered:</label>
+                    <select class="form-select" name='preferred_rate_choice'>
+                        {% for choice in preferred_rate_choice %}
+                        <option value="{{choice}}">{{choice}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preferred Rate:</label>
+                    <input type="number" class="form-control" name="preferred_rate">
+                </div>
+                <div class="form-group">
+                    <label for="comment">Message:</label>
+                    <textarea class="form-control" rows="5" id="comment" name="content"></textarea>
+                </div><br>
+                <input type="submit" class="btn btn-primary" value="Submit"></input>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="modal fade modal-dialog-scrollable" id="reply" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="replyLabel">Reply Message</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="{{ url_for('bids.bid_messages', bid_id=the_bid['id']) }}" method="POST">
+                {{ csrf_token }}
+            <div class="form-group">
+                <label for="comment">Message:</label>
+                <textarea class="form-control" rows="5" id="comment2" name="content"></textarea>
+            </div>
+                <input type="submit" class="btn btn-primary" value="Submit"></input>
+            </form>
+        </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+{% endblock %}

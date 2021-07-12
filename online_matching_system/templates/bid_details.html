@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Online Matching System</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid">Bid</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/contract">Contract</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/bid_monitor">Bid Monitor</a>
+              </li>
+              <li class="nav-item" style="float:right;">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 1rem;">
+        <!-- Bid Details-->
+        <div class="card">
+            <h5 class="card-header">Bid Details</h5>
+            <div class="card-body">
+                <h5 class="card-title">{{ bid_details.bid_subject }}</h5>
+                <p class="card-text">{{ bid_details.bid_date_created }}</p>
+                <p class="card-text">{{ bid_details.bid_date_closed_down }}</p>
+                <p class="card-text"><small class="text-muted">Type: {{ bid_details.bid_type.lower() }}</small></p>
+                <hr>
+                <!-- <h6 class="card-title">Your requests</h6> -->
+                <p class="card-text"><strong>Tutor Qualification:</strong> {{ bid_details.initiator_bid.tutorQualification }}</p>
+                <p class="card-text"><strong>Lesson Needed:</strong> {{ bid_details.initiator_bid.lessonNeeded }}</p>
+                <p class="card-text"><strong>Hours Per Lesson:</strong> {{ bid_details.initiator_bid.preferredHoursPerLesson }} hours</p>
+                <p class="card-text"><strong>Session Per Week:</strong> {{ bid_details.initiator_bid.preferredSessionPerWeek }}</p>
+                <p class="card-text"><strong>Time:</strong> {{ bid_details.initiator_bid.preferredTime }}</p>
+                <p class="card-text"><strong>Day:</strong> {{ bid_details.initiator_bid.preferredDay }}</p>
+                <p class="card-text"><strong>Rate:</strong> RM {{ bid_details.initiator_bid.preferredRate }} {{ bid_details.initiator_bid.preferredRateChoice }}</p>
+                <hr>
+                {% if bid_details.bidder_request %}
+                  <div class="row">
+                  {% for bid in bid_details.bidder_request %}
+                      <div class="col-sm-4">
+                        {% if bid.bid_chosen %}<div class="card text-white bg-success">{% else %}<div class="card">{% endif %}
+                          <div class="card-body">
+                            <p class="card-text"><strong>Bidder: </strong>{{bid.bidder}}</p>
+                            <p class="card-text"><strong>Number of Lesson Offered:</strong> {{ bid.numberOfLessonOffered }}</p>
+                            <p class="card-text"><strong>Hours Per Lesson Offered:</strong> {{ bid.hoursPerLessonOffered }} hours</p>
+                            <p class="card-text"><strong>Session Per Week Offered:</strong> {{ bid.sessionPerWeekOffered }}</p>
+                            <p class="card-text"><strong>Day and Time: </strong> {{ bid.preferredDayOffered }}, {{ bid.preferredTimeOffered }}</p>
+                            <p class="card-text"><strong>Free Lesson: </strong> {{ bid.freeLesson }} </p>
+                            <p class="card-text"><strong>Rate: </strong> RM{{ bid.rateRequest }} {{ bid.rateChoiceOffered }} </p>
+                            {% if not bid_details.bid_date_closed_down %}
+                            <a href="{{ url_for('bids.choose_offer',bid_id=bid.bidId,bidder_id=bid.bidderId) }}" class="btn btn-primary">Choose</a>
+                            {% endif %}
+                            </div>
+                            </div>
+                            </div>
+                      </div>
+                  {% endfor %}
+                  </div>
+                {% else %}
+                {% if bid_details.bid_date_closed_down %}<li class="list-group-item list-group-item-secondary">There's no bid</li>{% else %}<li class="list-group-item list-group-item-secondary">There's no bid yet</li>{% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

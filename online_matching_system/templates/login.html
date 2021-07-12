@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+<div class="row text-center" style="margin-top:18rem;">
+    <h1>Login</h1>
+    <form action="{{ url_for('users.login') }}" method="post">
+        {{ form.csrf_token }}
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Username:</label>
+          {{form.username}}
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Password:</label>
+          {{form.password}}
+        </div>
+        <button type="submit" value="Submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+{% endblock %}

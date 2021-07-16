@@ -9,9 +9,11 @@ This assignment required us to design an Online Matching System(OMS) for student
 _*The deliverables can be found in *online_matching_system/deliverables/Assignment 3_ <br>
 _*The environment can be found in the oms_env file_
 
-Student: Lim Jin Yung (29036186), Chew Shen Min (29640938)
+<ins>Student: <br>
+  Lim Jin Yung (29036186)<br>
+  Chew Shen Min (29640938)
 
-Contribution (Assignment 3): <br>
+<ins>Contribution (Assignment 3): <br>
 Lim Jin Yung - Requirement 1,3 & Refactoring, Design Rationale <br>
 Chew Shen Min - Requirement 2 & Class Diagram
 

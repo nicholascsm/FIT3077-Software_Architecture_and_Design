@@ -6,8 +6,8 @@ To run the program:
 2. install all the dependencies by running "pip3 install -r requirements.txt"
 3. run the command "python app.py" to start the program
 
-_The deliverables can be found in *online_matching_system/deliverables/Assignment 3*_
-_The environment can be found in the oms_env file_
+_*The deliverables can be found in *online_matching_system/deliverables/Assignment 3_ <br>
+_*The environment can be found in the oms_env file_
 
 Student:
 Lim Jin Yung 29036186
